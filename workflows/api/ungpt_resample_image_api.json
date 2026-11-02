@@ -1,0 +1,220 @@
+{
+ "1": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "moss_image_sft_bf16.safetensors",
+   "weight_dtype": "default"
+  },
+  "_meta": {
+   "title": "UNETLoader"
+  }
+ },
+ "2": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3.5_9b_bf16.safetensors",
+   "type": "moss_image",
+   "device": "default"
+  },
+  "_meta": {
+   "title": "CLIPLoader"
+  }
+ },
+ "3": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  },
+  "_meta": {
+   "title": "VAELoader"
+  }
+ },
+ "4": {
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "lora_name": "ungpt_v1.safetensors",
+   "strength_model": 1.0
+  },
+  "_meta": {
+   "title": "un-GPT LoRA"
+  }
+ },
+ "5": {
+  "class_type": "SkipLayerGuidanceDiTSimple",
+  "inputs": {
+   "model": [
+    "4",
+    0
+   ],
+   "double_layers": "",
+   "single_layers": "22",
+   "start_percent": 0.0,
+   "end_percent": 1.0
+  },
+  "_meta": {
+   "title": "Skip-layer guidance (block 22)"
+  }
+ },
+ "20": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "example_moss_sft_output.png"
+  },
+  "_meta": {
+   "title": "MOSS SFT image"
+  }
+ },
+ "21": {
+  "class_type": "ImageScaleToTotalPixels",
+  "inputs": {
+   "image": [
+    "20",
+    0
+   ],
+   "upscale_method": "lanczos",
+   "megapixels": 1.0,
+   "resolution_steps": 16
+  },
+  "_meta": {
+   "title": "Scale to 1 MP"
+  }
+ },
+ "22": {
+  "class_type": "GetImageSize",
+  "inputs": {
+   "image": [
+    "21",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "GetImageSize"
+  }
+ },
+ "9": {
+  "class_type": "TextEncodeMOSSImageEdit",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ],
+   "images.image_0": [
+    "21",
+    0
+   ],
+   "prompt": "Redraw this image as hand-drawn anime art without the AI-generated look. Keep the character, pose, outfit and framing.",
+   "edit_format": "ai-toolkit (kv_cache off)",
+   "image_strength": 1.0
+  },
+  "_meta": {
+   "title": "Instruction (keep it word for word)"
+  }
+ },
+ "10": {
+  "class_type": "TextEncodeMOSSImageEdit",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ],
+   "images.image_0": [
+    "21",
+    0
+   ],
+   "prompt": "",
+   "edit_format": "ai-toolkit (kv_cache off)",
+   "image_strength": 1.0
+  },
+  "_meta": {
+   "title": "Negative: empty prompt, same image"
+  }
+ },
+ "13": {
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "width": [
+    "22",
+    0
+   ],
+   "height": [
+    "22",
+    1
+   ],
+   "batch_size": 1
+  },
+  "_meta": {
+   "title": "Same size as the image"
+  }
+ },
+ "14": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "5",
+    0
+   ],
+   "positive": [
+    "9",
+    0
+   ],
+   "negative": [
+    "10",
+    0
+   ],
+   "latent_image": [
+    "13",
+    0
+   ],
+   "seed": 1,
+   "steps": 50,
+   "cfg": 3.0,
+   "sampler_name": "euler",
+   "scheduler": "sgm_uniform",
+   "denoise": 1.0
+  },
+  "_meta": {
+   "title": "Re-sample"
+  }
+ },
+ "15": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "14",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "VAEDecode"
+  }
+ },
+ "16": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "15",
+    0
+   ],
+   "filename_prefix": "ungpt"
+  },
+  "_meta": {
+   "title": "After"
+  }
+ }
+}

@@ -1,0 +1,308 @@
+{
+ "1": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "moss_image_sft_bf16.safetensors",
+   "weight_dtype": "default"
+  },
+  "_meta": {
+   "title": "UNETLoader"
+  }
+ },
+ "2": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3.5_9b_bf16.safetensors",
+   "type": "moss_image",
+   "device": "default"
+  },
+  "_meta": {
+   "title": "CLIPLoader"
+  }
+ },
+ "3": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  },
+  "_meta": {
+   "title": "VAELoader"
+  }
+ },
+ "5": {
+  "class_type": "SkipLayerGuidanceDiTSimple",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "double_layers": "",
+   "single_layers": "22",
+   "start_percent": 0.0,
+   "end_percent": 1.0
+  },
+  "_meta": {
+   "title": "Skip-layer guidance (block 22)"
+  }
+ },
+ "9": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "text": "A girl with short silver hair and red eyes in a black school uniform, standing in a classroom at sunset, upper body, looking at the viewer."
+  },
+  "_meta": {
+   "title": "Your prompt"
+  }
+ },
+ "10": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "text": ""
+  },
+  "_meta": {
+   "title": "Negative (leave empty)"
+  }
+ },
+ "13": {
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "width": 1024,
+   "height": 1024,
+   "batch_size": 1
+  },
+  "_meta": {
+   "title": "Image size"
+  }
+ },
+ "14": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "5",
+    0
+   ],
+   "positive": [
+    "9",
+    0
+   ],
+   "negative": [
+    "10",
+    0
+   ],
+   "latent_image": [
+    "13",
+    0
+   ],
+   "seed": 1,
+   "steps": 50,
+   "cfg": 3.0,
+   "sampler_name": "euler",
+   "scheduler": "sgm_uniform",
+   "denoise": 1.0
+  },
+  "_meta": {
+   "title": "Pass 1: text-to-image"
+  }
+ },
+ "15": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "14",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "VAEDecode"
+  }
+ },
+ "16": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "15",
+    0
+   ],
+   "filename_prefix": "moss_sft"
+  },
+  "_meta": {
+   "title": "Before"
+  }
+ },
+ "24": {
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "lora_name": "ungpt_v1.safetensors",
+   "strength_model": 1.0
+  },
+  "_meta": {
+   "title": "un-GPT LoRA"
+  }
+ },
+ "25": {
+  "class_type": "SkipLayerGuidanceDiTSimple",
+  "inputs": {
+   "model": [
+    "24",
+    0
+   ],
+   "double_layers": "",
+   "single_layers": "22",
+   "start_percent": 0.0,
+   "end_percent": 1.0
+  },
+  "_meta": {
+   "title": "Skip-layer guidance (block 22)"
+  }
+ },
+ "29": {
+  "class_type": "TextEncodeMOSSImageEdit",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ],
+   "images.image_0": [
+    "15",
+    0
+   ],
+   "prompt": "Redraw this image as hand-drawn anime art without the AI-generated look. Keep the character, pose, outfit and framing.",
+   "edit_format": "ai-toolkit (kv_cache off)",
+   "image_strength": 1.0
+  },
+  "_meta": {
+   "title": "Instruction (keep it word for word)"
+  }
+ },
+ "30": {
+  "class_type": "TextEncodeMOSSImageEdit",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ],
+   "images.image_0": [
+    "15",
+    0
+   ],
+   "prompt": "",
+   "edit_format": "ai-toolkit (kv_cache off)",
+   "image_strength": 1.0
+  },
+  "_meta": {
+   "title": "Negative: empty prompt, same image"
+  }
+ },
+ "31": {
+  "class_type": "GetImageSize",
+  "inputs": {
+   "image": [
+    "15",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "GetImageSize"
+  }
+ },
+ "33": {
+  "class_type": "EmptyFlux2LatentImage",
+  "inputs": {
+   "width": [
+    "31",
+    0
+   ],
+   "height": [
+    "31",
+    1
+   ],
+   "batch_size": 1
+  },
+  "_meta": {
+   "title": "Same size as the image"
+  }
+ },
+ "34": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "25",
+    0
+   ],
+   "positive": [
+    "29",
+    0
+   ],
+   "negative": [
+    "30",
+    0
+   ],
+   "latent_image": [
+    "33",
+    0
+   ],
+   "seed": 1,
+   "steps": 50,
+   "cfg": 3.0,
+   "sampler_name": "euler",
+   "scheduler": "sgm_uniform",
+   "denoise": 1.0
+  },
+  "_meta": {
+   "title": "Pass 2: re-sample"
+  }
+ },
+ "35": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "34",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "VAEDecode"
+  }
+ },
+ "36": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "35",
+    0
+   ],
+   "filename_prefix": "ungpt"
+  },
+  "_meta": {
+   "title": "After"
+  }
+ }
+}

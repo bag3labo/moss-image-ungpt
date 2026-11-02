@@ -1,0 +1,1088 @@
+{
+ "last_node_id": 37,
+ "last_link_id": 28,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "UNETLoader",
+   "pos": [
+    40,
+    80
+   ],
+   "size": [
+    300,
+    82
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      1,
+      11
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "moss_image_sft_bf16.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "CLIPLoader",
+   "pos": [
+    40,
+    200
+   ],
+   "size": [
+    300,
+    106
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      2,
+      3,
+      13,
+      16
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen3.5_9b_bf16.safetensors",
+    "moss_image",
+    "default"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "VAELoader",
+   "pos": [
+    40,
+    350
+   ],
+   "size": [
+    300,
+    58
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      9,
+      14,
+      17,
+      27
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "flux2-vae.safetensors"
+   ]
+  },
+  {
+   "id": 5,
+   "type": "SkipLayerGuidanceDiTSimple",
+   "pos": [
+    400,
+    80
+   ],
+   "size": [
+    300,
+    160
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      4
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SkipLayerGuidanceDiTSimple"
+   },
+   "widgets_values": [
+    "",
+    "22",
+    0.0,
+    1.0
+   ],
+   "title": "Skip-layer guidance (block 22)"
+  },
+  {
+   "id": 9,
+   "type": "CLIPTextEncode",
+   "pos": [
+    400,
+    280
+   ],
+   "size": [
+    400,
+    160
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      5
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "A girl with short silver hair and red eyes in a black school uniform, standing in a classroom at sunset, upper body, looking at the viewer."
+   ],
+   "title": "Your prompt"
+  },
+  {
+   "id": 10,
+   "type": "CLIPTextEncode",
+   "pos": [
+    400,
+    480
+   ],
+   "size": [
+    400,
+    100
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      6
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    ""
+   ],
+   "title": "Negative (leave empty)"
+  },
+  {
+   "id": 13,
+   "type": "EmptyFlux2LatentImage",
+   "pos": [
+    840,
+    80
+   ],
+   "size": [
+    260,
+    130
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      7
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "EmptyFlux2LatentImage"
+   },
+   "widgets_values": [
+    1024,
+    1024,
+    1
+   ],
+   "title": "Image size"
+  },
+  {
+   "id": 14,
+   "type": "KSampler",
+   "pos": [
+    840,
+    250
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 4
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 5
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 6
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      8
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    1,
+    "fixed",
+    50,
+    3.0,
+    "euler",
+    "sgm_uniform",
+    1.0
+   ],
+   "title": "Pass 1: text-to-image"
+  },
+  {
+   "id": 15,
+   "type": "VAEDecode",
+   "pos": [
+    1180,
+    80
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 8
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 9
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      10,
+      15,
+      18,
+      19
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 16,
+   "type": "SaveImage",
+   "pos": [
+    1180,
+    160
+   ],
+   "size": [
+    320,
+    320
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 10
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "moss_sft"
+   ],
+   "title": "Before"
+  },
+  {
+   "id": 24,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    400,
+    720
+   ],
+   "size": [
+    300,
+    82
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 11
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      12
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "ungpt_v1.safetensors",
+    1.0
+   ],
+   "title": "un-GPT LoRA"
+  },
+  {
+   "id": 25,
+   "type": "SkipLayerGuidanceDiTSimple",
+   "pos": [
+    400,
+    840
+   ],
+   "size": [
+    300,
+    160
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 12
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      22
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SkipLayerGuidanceDiTSimple"
+   },
+   "widgets_values": [
+    "",
+    "22",
+    0.0,
+    1.0
+   ],
+   "title": "Skip-layer guidance (block 22)"
+  },
+  {
+   "id": 29,
+   "type": "TextEncodeMOSSImageEdit",
+   "pos": [
+    740,
+    720
+   ],
+   "size": [
+    400,
+    220
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 13
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 14
+    },
+    {
+     "name": "images.image_0",
+     "type": "IMAGE",
+     "link": 15
+    },
+    {
+     "name": "images.image_1",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      23
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeMOSSImageEdit"
+   },
+   "widgets_values": [
+    "Redraw this image as hand-drawn anime art without the AI-generated look. Keep the character, pose, outfit and framing.",
+    "ai-toolkit (kv_cache off)",
+    1.0
+   ],
+   "title": "Instruction (keep it word for word)"
+  },
+  {
+   "id": 30,
+   "type": "TextEncodeMOSSImageEdit",
+   "pos": [
+    740,
+    980
+   ],
+   "size": [
+    400,
+    220
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 16
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 17
+    },
+    {
+     "name": "images.image_0",
+     "type": "IMAGE",
+     "link": 18
+    },
+    {
+     "name": "images.image_1",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      24
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeMOSSImageEdit"
+   },
+   "widgets_values": [
+    "",
+    "ai-toolkit (kv_cache off)",
+    1.0
+   ],
+   "title": "Negative: empty prompt, same image"
+  },
+  {
+   "id": 31,
+   "type": "GetImageSize",
+   "pos": [
+    1180,
+    720
+   ],
+   "size": [
+    210,
+    90
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 19
+    }
+   ],
+   "outputs": [
+    {
+     "name": "width",
+     "type": "INT",
+     "links": [
+      20
+     ]
+    },
+    {
+     "name": "height",
+     "type": "INT",
+     "links": [
+      21
+     ]
+    },
+    {
+     "name": "batch_size",
+     "type": "INT",
+     "links": []
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "GetImageSize"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 33,
+   "type": "EmptyFlux2LatentImage",
+   "pos": [
+    1180,
+    850
+   ],
+   "size": [
+    260,
+    130
+   ],
+   "flags": {},
+   "order": 15,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "width",
+     "type": "INT",
+     "widget": {
+      "name": "width"
+     },
+     "link": 20
+    },
+    {
+     "name": "height",
+     "type": "INT",
+     "widget": {
+      "name": "height"
+     },
+     "link": 21
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      25
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "EmptyFlux2LatentImage"
+   },
+   "widgets_values": [
+    1024,
+    1024,
+    1
+   ],
+   "title": "Same size as the image"
+  },
+  {
+   "id": 34,
+   "type": "KSampler",
+   "pos": [
+    1180,
+    1020
+   ],
+   "size": [
+    300,
+    262
+   ],
+   "flags": {},
+   "order": 16,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 22
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 23
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 24
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 25
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      26
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    1,
+    "fixed",
+    50,
+    3.0,
+    "euler",
+    "sgm_uniform",
+    1.0
+   ],
+   "title": "Pass 2: re-sample"
+  },
+  {
+   "id": 35,
+   "type": "VAEDecode",
+   "pos": [
+    1520,
+    720
+   ],
+   "size": [
+    200,
+    46
+   ],
+   "flags": {},
+   "order": 17,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 26
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 27
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      28
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 36,
+   "type": "SaveImage",
+   "pos": [
+    1520,
+    800
+   ],
+   "size": [
+    320,
+    320
+   ],
+   "flags": {},
+   "order": 18,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 28
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "ungpt"
+   ],
+   "title": "After"
+  },
+  {
+   "id": 37,
+   "type": "Note",
+   "pos": [
+    40,
+    450
+   ],
+   "size": [
+    300,
+    420
+   ],
+   "flags": {},
+   "order": 19,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "un-GPT re-sample for MOSS-Image SFT\n\nEdit the prompt and the image size, then queue.\n\nIn ComfyUI's models folder:\ndiffusion_models/moss_image_sft_bf16.safetensors\ntext_encoders/qwen3.5_9b_bf16.safetensors\nvae/flux2-vae.safetensors\nloras/ungpt_v1.safetensors\n\nKeep pass 2 as it is: the exact instruction, the edit format, 50 steps, CFG 3, LoRA strength 1.0. These are the settings the results were measured with."
+   ],
+   "title": "Read me"
+  }
+ ],
+ "links": [
+  [
+   1,
+   1,
+   0,
+   5,
+   0,
+   "MODEL"
+  ],
+  [
+   2,
+   2,
+   0,
+   9,
+   0,
+   "CLIP"
+  ],
+  [
+   3,
+   2,
+   0,
+   10,
+   0,
+   "CLIP"
+  ],
+  [
+   4,
+   5,
+   0,
+   14,
+   0,
+   "MODEL"
+  ],
+  [
+   5,
+   9,
+   0,
+   14,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   6,
+   10,
+   0,
+   14,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   7,
+   13,
+   0,
+   14,
+   3,
+   "LATENT"
+  ],
+  [
+   8,
+   14,
+   0,
+   15,
+   0,
+   "LATENT"
+  ],
+  [
+   9,
+   3,
+   0,
+   15,
+   1,
+   "VAE"
+  ],
+  [
+   10,
+   15,
+   0,
+   16,
+   0,
+   "IMAGE"
+  ],
+  [
+   11,
+   1,
+   0,
+   24,
+   0,
+   "MODEL"
+  ],
+  [
+   12,
+   24,
+   0,
+   25,
+   0,
+   "MODEL"
+  ],
+  [
+   13,
+   2,
+   0,
+   29,
+   0,
+   "CLIP"
+  ],
+  [
+   14,
+   3,
+   0,
+   29,
+   1,
+   "VAE"
+  ],
+  [
+   15,
+   15,
+   0,
+   29,
+   2,
+   "IMAGE"
+  ],
+  [
+   16,
+   2,
+   0,
+   30,
+   0,
+   "CLIP"
+  ],
+  [
+   17,
+   3,
+   0,
+   30,
+   1,
+   "VAE"
+  ],
+  [
+   18,
+   15,
+   0,
+   30,
+   2,
+   "IMAGE"
+  ],
+  [
+   19,
+   15,
+   0,
+   31,
+   0,
+   "IMAGE"
+  ],
+  [
+   20,
+   31,
+   0,
+   33,
+   0,
+   "INT"
+  ],
+  [
+   21,
+   31,
+   1,
+   33,
+   1,
+   "INT"
+  ],
+  [
+   22,
+   25,
+   0,
+   34,
+   0,
+   "MODEL"
+  ],
+  [
+   23,
+   29,
+   0,
+   34,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   24,
+   30,
+   0,
+   34,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   25,
+   33,
+   0,
+   34,
+   3,
+   "LATENT"
+  ],
+  [
+   26,
+   34,
+   0,
+   35,
+   0,
+   "LATENT"
+  ],
+  [
+   27,
+   3,
+   0,
+   35,
+   1,
+   "VAE"
+  ],
+  [
+   28,
+   35,
+   0,
+   36,
+   0,
+   "IMAGE"
+  ]
+ ],
+ "groups": [
+  {
+   "id": 1,
+   "title": "Pass 1: MOSS SFT text-to-image",
+   "bounding": [
+    380,
+    10,
+    1140,
+    610
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "Pass 2: re-sample with ungpt_v1",
+   "bounding": [
+    380,
+    650,
+    1480,
+    660
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  }
+ ],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}
